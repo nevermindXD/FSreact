@@ -1,10 +1,6 @@
 class ProductList extends React.Component {
-    constructor(props){
-        super(props);
-
-        this.state={
-            products:[]
-        };
+    state = {
+        products: []
     }
 
     componentDidMount(){
@@ -13,55 +9,58 @@ class ProductList extends React.Component {
         });
     }
 
-    handleProductUpVote(productId){
+    handleProductUpVote = (productId) => {
         const {products} = this.state;
 
-        products.forEach((product) =>{
-            if(product.id === productID){
-                product.votes++;
-            }
-        });
-        
-        this.setState({
-            products
-        })
-  
-    }
+       const nextProducts = products.map((product) => {
+            if(product.id === productId){ 
+                return Object.assign({}, product , {
+                    votes: product.votes + 1
+                });
+            }else{
+                return product;
+            }    
+       });
+
+       this.setState({
+           products :nextProducts
+       })
+
+    };
 
     render() {
-        const products = this.state.products.sort((a,b) => (
+        const {products} = this.state;
+        
+        const productsRender = products.sort((a,b) => (
             b.votes - a.votes
         ));
+
+        const productComponents = productsRender.map((product) => (
+            <Product
+              key={'product-' + product.id}
+              id={product.id}
+              title={product.title}
+              description={product.description}
+              url={product.url}
+              votes={product.votes}
+              submitterAvatarUrl={product.submitterAvatarUrl}
+              productImageUrl={product.productImageUrl}
+              onVote={this.handleProductUpVote}
+            />
+          ));
         return (
             <div className='ui unstackable items'>
-               {Seed.products.map((product) => (
-                <Product
-                    key={'product-'+product.id}
-                    id={product.id}
-                    title={product.title}
-                    description={product.description}
-                    url={product.url}
-                    votes={product.votes}
-                    submitterAvatarUrl={product.submitterAvatarUrl}
-                    productImageUrl={product.productImageUrl}
-                    onVote={this.handleProductUpVote}
-                />
-               ))} 
+              {productComponents}
             </div>
-        );
+          );
     }
 }
 
 class Product extends React.Component{
-    constructor(props){
-        super(props)
 
-        this.handleUpVote = this.handleUpVote.bind(this);
-    }
-
-    handleUpVote() {
-        this.props.onVote(this.props.id);
-    }
+    handleUpVote = () => (      
+          this.props.onVote(this.props.id)
+    );
 
     render(){
         const {productImageUrl,votes, url, title , description, submitterAvatarUrl} = this.props;
